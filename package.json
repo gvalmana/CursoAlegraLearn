@@ -1,0 +1,18 @@
+{
+  "name": "cursoalegralearn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "producer": "tsc && node dist/index.js",
+    "consumer": "tsc && node dist/consumer.js",
+    "schemaProducer": "tsc && node dist/schemaProducer.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@kafkajs/confluent-schema-registry": "^3.3.0",
+    "kafkajs": "^2.2.4"
+  }
+}
