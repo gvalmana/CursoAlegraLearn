@@ -1,4 +1,4 @@
-import { kafkaClient } from "./kafka";
+import { kafkaClient } from "./adapters/kafka";
 import { resetOffestConfigs } from "./configs/resetConfigs";
 
 async function run(): Promise<void>{

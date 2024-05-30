@@ -1,5 +1,5 @@
 import { Producer, ProducerRecord } from "kafkajs";
-import { kafkaClient } from "./kafka";
+import { kafkaClient } from "./adapters/kafka";
 
 async function run(): Promise<void> {
     

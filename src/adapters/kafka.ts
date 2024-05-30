@@ -1,5 +1,5 @@
 import { Kafka, KafkaConfig } from "kafkajs";
-import { KAFKA_BROKERS, KAFKA_KEY, KAFKA_SECRET } from "./configs/EviromentsVariables";
+import { KAFKA_BROKERS, KAFKA_KEY, KAFKA_SECRET } from "../configs/EviromentsVariables";
 
 const config: KafkaConfig = {
     brokers: KAFKA_BROKERS,

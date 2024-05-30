@@ -1,6 +1,6 @@
 import { ConsumerConfig, ConsumerSubscribeTopics, EachMessagePayload } from "kafkajs";
-import { kafkaClient } from "./kafka";
 import{ KAFKA_CONSUMER_GROUP_ID, KAFKA_TOPIC } from "./configs/EviromentsVariables";
+import { kafkaClient } from "./adapters/kafka";
 
 async function run(): Promise<void>{
     const consumerConfig: ConsumerConfig = {
