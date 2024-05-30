@@ -6,8 +6,8 @@ import { LedgerKafkaAdapter } from "./adapters";
 
 async function run(): Promise<void>{
     const ledgerKafkaClient = new LedgerKafkaAdapter();
-    await ledgerKafkaClient.topic(KAFKA_TOPIC)
-        .groups(KAFKA_CONSUMER_GROUP_ID)
+    await ledgerKafkaClient.topics(KAFKA_TOPIC)
+        .group(KAFKA_CONSUMER_GROUP_ID)
         .consume();
 }
 

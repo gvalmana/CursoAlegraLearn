@@ -10,7 +10,7 @@ async function run(): Promise<void> {
     };
     const ledgerKafkaClient = new LedgerKafkaAdapter();
     await ledgerKafkaClient
-        .topic(KAFKA_TOPIC)
+        .topics(KAFKA_TOPIC)
         .schema(KAFKA_SCHEMA_ID)
         .produce(message);
 }

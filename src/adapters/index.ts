@@ -53,12 +53,12 @@ export abstract class BaseKafkaAdapter {
         this._kafkaClient = client;
     }
 
-    public topic(topics: string): BaseKafkaAdapter {
+    public topics(topics: string): BaseKafkaAdapter {
         this._topics = topics;
         return this;
     }
 
-    public groups(groupId: string): BaseKafkaAdapter {
+    public group(groupId: string): BaseKafkaAdapter {
         this._groupId = groupId;
         return this;
     }
