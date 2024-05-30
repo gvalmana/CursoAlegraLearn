@@ -2,16 +2,10 @@ import { v4 as uuid } from 'uuid';
 import { Product } from '../models';
 type eventType = 'CREATE' | 'UPDATE' | 'DELETE';
 
-export interface EventData<T> {
-    message: T;
-    eventType: eventType;
-    idCompany: string;
-}
-
 export abstract class Event<T> {
     protected _key: string;
     protected _timestamp: string;
-    protected _data: EventData<T>;
+    protected _data: T;
     protected _topic?: string;
     protected _groupId?: string;
 
@@ -46,11 +40,11 @@ export abstract class Event<T> {
         this._timestamp = value;
     }
 
-    get data(): EventData<T> {
+    get data(): T {
         return this._data;
     }
 
-    set data(value: EventData<T>) {
+    set data(value: T) {
         this._data = value;
     }
 
@@ -72,7 +66,7 @@ export abstract class Event<T> {
 }
 
 export class ProductEvent extends Event<Product> {
-    constructor(data: EventData<Product>) {
+    constructor(data: Product) {
         super(data);
     }
 }

@@ -3,18 +3,13 @@ import { v4 as uuidv4 } from 'uuid'
 import { LedgerKafkaAdapter } from "./adapters";
 import { KAFKA_SCHEMA_ID, KAFKA_TOPIC } from "./configs/EviromentsVariables";
 import { Event, ProductEvent } from "./events";
-import { EventData } from './events/index';
 
 async function run(): Promise<void> {
-    const product: Product = {
+    const dataMessage: Product = {
         id: uuidv4(),
-        precio: Math.floor(Math.random() * 1000)
-    }
-    const dataMessage: EventData<Product> = {
-        message: product,
-        eventType: 'CREATE',
+        precio: Math.floor(Math.random() * 1000),
         idCompany: Math.floor(Math.random() * 1000).toString()
-    };
+    }
     const message: Event<Product> = new ProductEvent(dataMessage);
     const ledgerKafkaClient = new LedgerKafkaAdapter();
     await ledgerKafkaClient
