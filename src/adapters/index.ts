@@ -1,7 +1,8 @@
-import { ConsumerConfig, ConsumerSubscribeTopics, EachMessagePayload, Kafka, KafkaConfig, Producer, ProducerConfig, ProducerRecord } from "kafkajs";
-import { KAFKA_BROKERS, KAFKA_CONSUMER_GROUP_ID, KAFKA_KEY, KAFKA_SECRET } from "../configs/EviromentsVariables";
+import { ConsumerConfig, ConsumerSubscribeTopics, EachBatchPayload, EachMessagePayload, Kafka, KafkaConfig, Producer, ProducerConfig, ProducerRecord } from "kafkajs";
+import { CONSUMER_MAX_BATCH_SIZE, KAFKA_BROKERS, KAFKA_CONSUMER_GROUP_ID, KAFKA_KEY, KAFKA_SECRET } from "../configs/EviromentsVariables";
 import { schemaRegistry } from "../schemasRegistry";
 import { v4 as uuidv4 } from 'uuid'
+import { Event } from "../events";
 
 export abstract class BaseKafkaAdapter {
     protected _kafkaClient: Kafka;
@@ -12,7 +13,8 @@ export abstract class BaseKafkaAdapter {
     protected _kafkaSchemaID: number;
     protected _consumerConfig: ConsumerConfig;
     protected _consumerSubscribeTopics: ConsumerSubscribeTopics;
-
+    protected _result: Array<any>;
+    
     constructor(config: KafkaConfig= null) {
         if (config) {
             this._kafkaClient = new Kafka(config);
@@ -68,18 +70,19 @@ export abstract class BaseKafkaAdapter {
         return this;
     }
 
-    abstract produce(message: any): Promise<void>;
-    abstract consume(): Promise<void>;
-    abstract messageHandler(payload: EachMessagePayload): Promise<any>;
+    abstract produce(message: Event<any>): Promise<void>;
+    abstract consume(): Promise<Array<any>>;
+    abstract messageHandler(payload: EachMessagePayload, result: Array<any>): Promise<void>;
+    abstract batchHandler(payload: EachBatchPayload, result: Array<any>): Promise<void>;
 }
 
 export class LedgerKafkaAdapter extends BaseKafkaAdapter {
-
-    public async produce(message: any): Promise<void> {
+    
+    async produce(message: Event<any>): Promise<void> {
         if (!this._kafkaClient) {
             throw new Error("Kafka client not initialized");
         }
-        if (!this._topics) {
+        if (!this._topics && !message.topic) {
             throw new Error("Topics not defined");
         }
         if (!this._kafkaSchemaID) {
@@ -91,13 +94,14 @@ export class LedgerKafkaAdapter extends BaseKafkaAdapter {
         const producer: Producer = this._kafkaClient.producer(this._producerConfig);
         await producer.connect();
         try {
-            const encodedMessage: Buffer = await schemaRegistry.encode(this._kafkaSchemaID, message);
+            const encodedMessage: Buffer = await schemaRegistry.encode(this._kafkaSchemaID, message.data);
             const producerRecord: ProducerRecord = {
-                topic: this._topics,
+                topic: message.topic?? this._topics,
                 messages: [
                     {
-                        key: uuidv4(),
-                        value: encodedMessage
+                        key: message.key,
+                        value: encodedMessage,
+                        timestamp: message.timestamp,
                     }
                 ]
             }
@@ -110,7 +114,7 @@ export class LedgerKafkaAdapter extends BaseKafkaAdapter {
         }
     }
 
-    public async consume(): Promise<void> {
+    async consume(): Promise<Array<any>> {
         if (!this._kafkaClient) {
             throw new Error("Kafka client not initialized");
         }
@@ -125,21 +129,42 @@ export class LedgerKafkaAdapter extends BaseKafkaAdapter {
         }
         const consumer = this._kafkaClient.consumer(this._consumerConfig);
         await consumer.connect();
-
-        const consumerTopcis: ConsumerSubscribeTopics = {
-            topics: [this._topics],
-            fromBeginning: true,
-        };
-        await consumer.subscribe(consumerTopcis);
-    
-        await consumer.run({
-            eachMessage: this.messageHandler,
-        })        
+        try {
+            const consumerTopcis: ConsumerSubscribeTopics = {
+                topics: [this._topics],
+                fromBeginning: true,
+            };
+            await consumer.subscribe(consumerTopcis);
+            let result: Array<any> = [];
+            await consumer.run({
+                eachMessage: (payload) => this.messageHandler(payload, result),
+                eachBatch: (payload) => this.batchHandler(payload, result),
+                eachBatchAutoResolve: true,
+            });
+            return result;  
+        } catch (error) {
+            console.error(`Error consuming message: ${error}`);
+            consumer.disconnect();
+        }
     }
 
-    public async messageHandler(payload: EachMessagePayload): Promise<any> {
+    async messageHandler(payload: EachMessagePayload, result: Array<any>): Promise<void> {
         const encodedValue = payload.message.value;
         const decodeValue = await schemaRegistry.decode(encodedValue);
-        console.log(`Received message`, decodeValue);
+        console.log(result);
+        result.push(decodeValue);
+    }
+
+    async batchHandler(payload: EachBatchPayload, result: Array<any>): Promise<void> {
+        const batchSize = CONSUMER_MAX_BATCH_SIZE;
+        const totalMessages = payload.batch.messages.length;
+        for (let i = 0; i < totalMessages; i+=batchSize) {
+            const subSet = payload.batch.messages.slice(i, i+batchSize);
+            await Promise.all(subSet.map(async(message) => {
+                const encodedValue = message.value;
+                const decodeValue = await schemaRegistry.decode(encodedValue);
+                result.push(decodeValue);
+            }));
+        }
     }
 }

@@ -73,3 +73,10 @@ export const KAFKA_CONSUMER_GROUP_ID = (consumerGroupId: string): string => {
     }
     return consumerGroupId;
 }
+
+export const CONSUMER_MAX_BATCH_SIZE = (maxBatchSize: string): number => {
+    if (maxBatchSize.trim() === ''){
+        throw new Error('process.env.CONSUMER_MAX_BATCH_SIZE is required');
+    }
+    return parseInt(maxBatchSize);
+};

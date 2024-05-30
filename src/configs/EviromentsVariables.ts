@@ -22,3 +22,5 @@ export const KAFKA_SCHEMA_REGISTRY_KEY = EnviromentGuards.KAFKA_SCHEMA_REGISTRY_
 export const KAFKA_SCHEMA_REGISTRY_SECRET = EnviromentGuards.KAFKA_SCHEMA_REGISTRY_SECRET(process.env.KAFKA_SCHEMA_REGISTRY_SECRET);
 export const KAFKA_SCHEMA_ID = EnviromentGuards.KAFKA_SCHEMA_ID(process.env.KAFKA_SCHEMA_ID ?? '100001');
 export const KAFKA_CONSUMER_GROUP_ID = EnviromentGuards.KAFKA_CONSUMER_GROUP_ID(process.env.KAFKA_CONSUMER_GROUP_ID ?? 'test-group');
+
+export const CONSUMER_MAX_BATCH_SIZE = EnviromentGuards.CONSUMER_MAX_BATCH_SIZE(process.env.CONSUMER_MAX_BATCH_SIZE ?? '10');
