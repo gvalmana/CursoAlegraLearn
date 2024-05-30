@@ -3,9 +3,9 @@ import { Product } from '../models';
 type eventType = 'CREATE' | 'UPDATE' | 'DELETE';
 
 export abstract class Event<T> {
+    protected _data: T;
     protected _key: string;
     protected _timestamp: string;
-    protected _data: T;
     protected _topic?: string;
     protected _groupId?: string;
 
@@ -66,7 +66,13 @@ export abstract class Event<T> {
 }
 
 export class ProductEvent extends Event<Product> {
-    constructor(data: Product) {
-        super(data);
+    constructor(
+        data: Product,
+        topic?: string,
+        key?: string,
+        timestamp?: string,
+        groupId?: string
+    ) {
+        super(data, topic, key, timestamp, groupId);
     }
 }
