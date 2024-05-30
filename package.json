@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "producer": "tsc && node dist/index.js",
+    "producer": "tsc && node dist/producer.js",
     "consumer": "tsc && node dist/consumer.js",
-    "schemaProducer": "tsc && node dist/schemaProducer.js"
+    "schemaProducer": "tsc && node dist/schemaProducer.js",
+    "schemaConsumer": "tsc && node dist/schemaConsumer.js",
+    "resetOffset": "tsc && node dist/resetOffset.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +17,7 @@
     "@kafkajs/confluent-schema-registry": "^3.3.0",
     "dotenv": "^16.4.5",
     "kafkajs": "^2.2.4",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "uuid": "^9.0.1"
   }
 }

@@ -3,6 +3,7 @@ import { ProducerConfig, ProducerRecord } from "kafkajs";
 import { schemaRegistry } from "./schemasRegistry";
 import { Product } from "./models";
 import { KAFKA_SCHEMA_ID } from "./configs/EviromentsVariables";
+import { v4 as uuidv4 } from 'uuid'
 
 async function run(): Promise<void> {
 
@@ -15,8 +16,8 @@ async function run(): Promise<void> {
     try {
     
         const message: Product = {
-            id: "bar",
-            price: 100.00
+            id: uuidv4(),
+            price: Math.random() * 1000
         }
 
         const encodedMessage: Buffer = await schemaRegistry.encode(KAFKA_SCHEMA_ID, message);

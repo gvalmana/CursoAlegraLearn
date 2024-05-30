@@ -1,6 +1,7 @@
 import { ConsumerConfig, ConsumerSubscribeTopics, EachMessagePayload } from "kafkajs";
 import { kafkaClient } from "./kafka";
 import{ KAFKA_CONSUMER_GROUP_ID, KAFKA_TOPIC } from "./configs/EviromentsVariables";
+import { schemaRegistry } from "./schemasRegistry";
 
 async function run(): Promise<void>{
     const consumerConfig: ConsumerConfig = {
@@ -16,10 +17,14 @@ async function run(): Promise<void>{
     await consumer.subscribe(consumerTopcis);
 
     await consumer.run({
-        eachMessage: async (payload: EachMessagePayload) => {
-            console.log(`Received message: ${payload.message.value.toString()}`);
-        },
+        eachMessage: messageHandler,
     })
+}
+
+async function messageHandler(payload: EachMessagePayload): Promise<void> {
+    const encodedValue = payload.message.value;
+    const decodeValue = await schemaRegistry.decode(encodedValue);
+    console.log(`Received message`, decodeValue);
 }
 
 run().then(() => console.log("Consumer finished")).catch(console.error);

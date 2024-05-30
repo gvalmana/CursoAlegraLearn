@@ -66,3 +66,10 @@ export const KAFKA_SCHEMA_ID = (schemaId: string): number => {
     }
     return parseInt(schemaId);
 };
+
+export const KAFKA_CONSUMER_GROUP_ID = (consumerGroupId: string): string => {
+    if (consumerGroupId.trim() === ''){
+        throw new Error('process.env.KAFKA_CONSUMER_GROUP_ID is required');
+    }
+    return consumerGroupId;
+}
