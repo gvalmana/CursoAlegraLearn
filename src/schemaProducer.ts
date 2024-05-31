@@ -10,12 +10,13 @@ async function run(): Promise<void> {
         precio: Math.floor(Math.random() * 1000),
         idCompany: Math.floor(Math.random() * 1000).toString()
     }
-    const message: Event<Product> = new ProductEvent(dataMessage);
+    const messages: Array<Event<Product>> = [];
+    messages.push(new ProductEvent(dataMessage));
     const ledgerKafkaClient = new LedgerKafkaAdapter();
     await ledgerKafkaClient
         .topics(KAFKA_TOPIC)
         .schema(KAFKA_SCHEMA_ID)
-        .produce(message);
+        .produce(messages);
 }
 
 run().then(() => console.log("Producer finished")).catch((e) => console.log(e));

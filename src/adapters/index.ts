@@ -1,7 +1,6 @@
-import { ConsumerConfig, ConsumerSubscribeTopics, EachBatchPayload, EachMessagePayload, Kafka, KafkaConfig, Producer, ProducerConfig, ProducerRecord } from "kafkajs";
+import { ConsumerConfig, ConsumerSubscribeTopics, EachBatchPayload, EachMessagePayload, Kafka, KafkaConfig, Message, Producer, ProducerConfig, ProducerRecord } from "kafkajs";
 import { CONSUMER_MAX_BATCH_SIZE, KAFKA_BROKERS, KAFKA_CONSUMER_GROUP_ID, KAFKA_KEY, KAFKA_SECRET } from "../configs/EviromentsVariables";
 import { schemaRegistry } from "../schemasRegistry";
-import { v4 as uuidv4 } from 'uuid'
 import { Event } from "../events";
 
 export abstract class BaseKafkaAdapter {
@@ -70,7 +69,7 @@ export abstract class BaseKafkaAdapter {
         return this;
     }
 
-    abstract produce(message: Event<any>): Promise<void>;
+    abstract produce(message: Array<Event<any>>): Promise<void>;
     abstract consume(): Promise<Array<any>>;
     abstract messageHandler(payload: EachMessagePayload, result: Array<any>): Promise<void>;
     abstract batchHandler(payload: EachBatchPayload, result: Array<any>): Promise<void>;
@@ -78,11 +77,11 @@ export abstract class BaseKafkaAdapter {
 
 export class LedgerKafkaAdapter extends BaseKafkaAdapter {
     
-    async produce(message: Event<any>): Promise<void> {
+    async produce(messages: Event<any>[]): Promise<void> {
         if (!this._kafkaClient) {
             throw new Error("Kafka client not initialized");
         }
-        if (!this._topics && !message.topic) {
+        if (!this._topics) {
             throw new Error("Topics not defined");
         }
         if (!this._kafkaSchemaID) {
@@ -94,16 +93,19 @@ export class LedgerKafkaAdapter extends BaseKafkaAdapter {
         const producer: Producer = this._kafkaClient.producer(this._producerConfig);
         await producer.connect();
         try {
-            const encodedMessage: Buffer = await schemaRegistry.encode(this._kafkaSchemaID, message.data);
+            let messagesData = messages.map(async (element): Promise<Message> => {
+                const encodedMessage: Buffer = await schemaRegistry.encode(this._kafkaSchemaID, element.data);
+                return {
+                    key: element.key,
+                    value: encodedMessage,
+                    timestamp: element.timestamp,
+                    partition: element.partition?? null,
+                    headers: element.headers?? '',
+                } 
+            });
             const producerRecord: ProducerRecord = {
-                topic: message.topic?? this._topics,
-                messages: [
-                    {
-                        key: message.key,
-                        value: encodedMessage,
-                        timestamp: message.timestamp,
-                    }
-                ]
+                topic: this._topics,
+                messages: await Promise.all(messagesData),
             }
             await producer.send(producerRecord);
         } catch (error) {
@@ -132,7 +134,7 @@ export class LedgerKafkaAdapter extends BaseKafkaAdapter {
         try {
             const consumerTopcis: ConsumerSubscribeTopics = {
                 topics: [this._topics],
-                fromBeginning: true,
+                fromBeginning: false,
             };
             await consumer.subscribe(consumerTopcis);
             let result: Array<any> = [];

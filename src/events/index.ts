@@ -1,6 +1,5 @@
 import { v4 as uuid } from 'uuid';
 import { Product } from '../models';
-type eventType = 'CREATE' | 'UPDATE' | 'DELETE';
 
 export abstract class Event<T> {
     protected _data: T;
@@ -8,13 +7,17 @@ export abstract class Event<T> {
     protected _timestamp: string;
     protected _topic?: string;
     protected _groupId?: string;
+    protected _partition?: number;
+    protected _headers?: any;
 
     constructor(
         data: any,
         topic?: string,
         key?: string,
         timestamp?: string,
-        groupId?: string
+        groupId?: string,
+        partition?: null | number,
+        headers?: null | any
     ) {
         this._key = key?? uuid();
         this._timestamp = timestamp?? new Date().getTime().toString();
@@ -22,6 +25,8 @@ export abstract class Event<T> {
         this._topic = topic;
         this._groupId = groupId;
         this._data = data;
+        this._partition = partition;
+        this._headers = headers;
     }
 
     get key(): string {
@@ -63,6 +68,22 @@ export abstract class Event<T> {
     set groupId(value: string | undefined) {
         this._groupId = value;
     }
+
+    get partition(): number | undefined {
+        return this._partition;
+    }
+
+    set partition(value: number | undefined) {
+        this._partition = value;
+    }
+
+    get headers(): any {
+        return this._headers;
+    }
+
+    set headers(value: any) {
+        this._headers = value;
+    }
 }
 
 export class ProductEvent extends Event<Product> {
@@ -71,8 +92,10 @@ export class ProductEvent extends Event<Product> {
         topic?: string,
         key?: string,
         timestamp?: string,
-        groupId?: string
+        groupId?: string,
+        partition?: number,
+        headers?: any
     ) {
-        super(data, topic, key, timestamp, groupId);
+        super(data, topic, key, timestamp, groupId, partition, headers);
     }
 }
