@@ -80,3 +80,10 @@ export const CONSUMER_MAX_BATCH_SIZE = (maxBatchSize: string): number => {
     }
     return parseInt(maxBatchSize);
 };
+
+export const KAFKA_APP_CLIENT_ID = (clientId: string): string => {
+    if (clientId.trim() === ''){
+        throw new Error('process.env.KAFKA_APP_CLIENT_ID is required');
+    }
+    return clientId;
+};

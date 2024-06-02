@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
-import { Product } from '../models';
+import { Journal, Product } from '../models';
+import { KAFKA_SCHEMA_ID } from '../configs/EviromentsVariables';
 
 export abstract class Event<T> {
     protected _data: T;
@@ -9,6 +10,7 @@ export abstract class Event<T> {
     protected _groupId?: string;
     protected _partition?: number;
     protected _headers?: any;
+    protected _schemaId?: number;
 
     constructor(
         data: any,
@@ -84,6 +86,14 @@ export abstract class Event<T> {
     set headers(value: any) {
         this._headers = value;
     }
+
+    get schemaId(): number | undefined {
+        return this._schemaId;
+    }
+
+    set schemaId(value: number | undefined) {
+        this._schemaId = value;
+    }
 }
 
 export class ProductEvent extends Event<Product> {
@@ -97,5 +107,20 @@ export class ProductEvent extends Event<Product> {
         headers?: any
     ) {
         super(data, topic, key, timestamp, groupId, partition, headers);
+    }
+}
+
+export class JournalEvent extends Event<Journal> {
+    constructor(
+        data: Journal,
+        topic?: string,
+        key?: string,
+        timestamp?: string,
+        groupId?: string,
+        partition?: number,
+        headers?: any
+    ) {
+        super(data, topic, key, timestamp, groupId, partition, headers);
+        this._schemaId = KAFKA_SCHEMA_ID;
     }
 }

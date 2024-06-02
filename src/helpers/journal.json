@@ -1,0 +1,35 @@
+{
+  "idResource": "1",
+  "resourceType": "invoice",
+  "date": "2024-01-01",
+  "number": "CC-CSV-1",
+  "company": {
+    "id": "1212121"
+  },
+  "debit": [
+    {
+      "idCostCenter": null,
+      "idCategory": "1450081",
+      "idClient": "330834",
+      "amount": 0.3500000000,
+      "currency": { "companyCurrencyValues": { "amount": 1050 } },
+      "idConcept": null,
+      "concept": null,
+      "conceptAmount": null,
+      "conceptAmountSecondaryCurrency": null
+    }
+  ],
+  "credit": [
+    {
+      "idCostCenter": null,
+      "idCategory": "1449997",
+      "idClient": "330834",
+      "amount": 0.3500000000,
+      "currency": { "companyCurrencyValues": { "amount": 1050 } },
+      "idConcept": null,
+      "concept": null,
+      "conceptAmount": null,
+      "conceptAmountSecondaryCurrency": null
+    }
+  ]
+}
