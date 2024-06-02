@@ -22,7 +22,7 @@ export interface JournalInfo {
   idCostCenter?: string;
   idCategory: string;
   idClient: string;
-  amount: number;
+  amount: string;
   idConcept?: string;
   concept?: string;
   conceptAmount?: string;

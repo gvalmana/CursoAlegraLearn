@@ -10,13 +10,13 @@ async function run(): Promise<void> {
     const dataMessage: Journal = JSON.parse(json);
     const messages: Array<Event<Journal>> = [];
     messages.push(new JournalEvent(dataMessage));
-    // const ledgerKafkaClient = new LedgerKafkaAdapter();
-    // await ledgerKafkaClient
-    //     .topics(KAFKA_TOPIC)
-    //     .schema(KAFKA_SCHEMA_ID)
-    //     .produceBatch(messages);
-    const kafkaClient = new CustomKafkaAdapter();
-    await kafkaClient.produceBatch(messages);
+    const ledgerKafkaClient = new LedgerKafkaAdapter();
+    await ledgerKafkaClient
+        .topics(KAFKA_TOPIC)
+        .schema(KAFKA_SCHEMA_ID)
+        .produce(messages);
+    //const kafkaClient = new CustomKafkaAdapter();
+    //await kafkaClient.produce(messages);
 }
 
 run().then(() => console.log("Producer finished")).catch((e) => console.log(e));

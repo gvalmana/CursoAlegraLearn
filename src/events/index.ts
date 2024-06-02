@@ -95,7 +95,6 @@ export abstract class Event<T> {
         this._schemaId = value;
     }
 }
-
 export class ProductEvent extends Event<Product> {
     constructor(
         data: Product,
@@ -122,5 +121,9 @@ export class JournalEvent extends Event<Journal> {
     ) {
         super(data, topic, key, timestamp, groupId, partition, headers);
         this._schemaId = KAFKA_SCHEMA_ID;
+        this._headers = {
+            'applicationVersion': '1.0.0',
+            timestamp: new Date().toISOString(),
+        }
     }
 }
