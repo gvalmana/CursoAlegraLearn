@@ -8,8 +8,11 @@ async function run(): Promise<void> {
 
     const json = await readFile('./src/helpers/journal.json', 'utf-8');
     const dataMessage: Journal = JSON.parse(json);
+    const event = new JournalEvent(dataMessage);
+    event.headers.idCompany = dataMessage.company?.id?? "";
+    event.headers.type = "journal-created";
     const messages: Array<Event<Journal>> = [];
-    messages.push(new JournalEvent(dataMessage));
+    messages.push(event);
     const ledgerKafkaClient = new LedgerKafkaAdapter();
     await ledgerKafkaClient
         .topics(KAFKA_TOPIC)
